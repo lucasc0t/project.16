@@ -1,0 +1,56 @@
+services:
+    filemngr-web:
+        container_name: filemngr-web # Nome arbitrario del servizio di web hosting
+        hostname: filemngr-web
+        image: filemngr-web
+        #container_name: web-server # Nome arbitrario del servizio di web hosting
+        #hostname: web-server
+        #image: web-server
+        build:
+            context: .
+            dockerfile: ./docker-file-web # Docker file specifico per web-server
+        volumes:
+            - ../web/:/var/www/html/
+        ports:
+            - 80:80
+        environment:
+            - MYSQL_HOST=filemngr-db # Nome del servizio di DB creato nelle righe successive nel nostro caso "docker-php"
+            - MYSQL_USER=${MYSQL_USER} # Variabili presenti nel file .env
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+        depends_on:
+            #- docker-php # Dipendenza dal servizio di DB
+            - filemngr-db
+
+    filemngr-db:
+    #docker-php:
+        container_name: filemngr-db # Nome arbitrario del servizio di DB
+        hostname: filemngr-db
+        image: filemngr-db
+        #container_name: docker-php # Nome arbitrario del servizio di DB
+        #hostname: docker-php
+        #image: docker-php
+        build:
+            context: .
+            dockerfile: ./docker-file-mysql # Docker file specifico per DB MYSQL
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_ALLOW_AMPTY_PASSWORD: "yes"
+        ports:
+            - ${MYSQL_PORT}:3306 # Forwarding porte tra servizi 
+        volumes:
+            - ./db_data/:/docker-entrypoint-initdb.d/ # collegamento volumi con container
+
+    filemngr-phpmyadmin:
+    #web-server-phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - 8001:80
+        environment:
+            #- PMA_HOST=docker-php
+            - PMA_HOST=filemngr-db 
+            - PMA_PORT=3306
+
