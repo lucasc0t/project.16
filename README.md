@@ -1,2 +1,2 @@
 # project.16
- Progetto n°16 - Ingengeria del Software
+ Progetto n°16 - Ingegneria del Software
